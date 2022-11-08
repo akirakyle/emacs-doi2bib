@@ -6,7 +6,7 @@
 ;; Author: Akira Kyle <akira@akirakyle.com>
 ;; URL: https://github.com/akirakyle/emacs-webkit
 ;; Version: 0.1
-;; Package-Requires: ((dash))
+;; Package-Requires: ((dash) (s))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -32,10 +32,13 @@
 (require 'json)
 
 (require 'dash)
+(require 's)
 
-(setq doi2bib-bibliography nil);'citar-bibliography)
-(setq doi2bib-dx-doi-org-url "https://doi.org/")
-;; "Base url to retrieve doi metadata from. A trailing / is required."
+(defvar doi2bib-bibliography nil
+  "Defalut bibtex file to add entries to.")
+
+(defvar doi2bib-dx-doi-org-url "https://doi.org/"
+  "Base url to retrieve doi metadata from. A trailing / is required.")
 ;; Could also use "http://dx.doi.org/"?
 
 ;; Getting bibtex entries from a DOI
