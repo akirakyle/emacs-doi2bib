@@ -34,8 +34,11 @@
 (require 'dash)
 (require 's)
 
-(defvar doi2bib-bibliography nil
-  "Defalut bibtex file to add entries to.")
+(defvar doi2bib-default-bibtex-files nil
+  "Defalut set of bibtex files to prompt with.")
+
+(defvar doi2bib-bibtex-to-disable-prompt nil
+  "Seting to a bibtex file will disable the prompt for the bibtex file.")
 
 (defvar doi2bib-dx-doi-org-url "https://doi.org/"
   "Base url to retrieve doi metadata from. A trailing / is required.")
@@ -86,7 +89,7 @@
   (defvar doi2bib-json-metadata-extract
     '((type       (plist-get results :type))
       (author     (mapconcat (lambda (x)
-			       (message "%s" x)
+			       ;(message "%s" x)
 			       (if (plist-get x :name)
 				   (plist-get x :name)
 				 (concat (plist-get x :given) " " (plist-get x :family))))
@@ -194,12 +197,14 @@ MATCHING-TYPES."
 ;; inserts the string into a buffer. This function will insert the string at the
 ;; cursor, clean the entry.
 (defun doi2bib-insert-bibtex-entry-from-doi (doi)
-  "Insert and clean bibtex entry from a DOI."
+  "Insert and clean bibtex entry from a DOI. Returns the output of
+`bibtex-parse-entry' on the newly inserted bibtex entry"
   (insert (doi2bib-doi-to-bibtex-string doi))
   (backward-char)
   ;(bibtex-autokey-edit-before-use nil)
   (bibtex-clean-entry t)
-  (save-buffer))
+  (save-buffer)
+  (bibtex-parse-entry))
 
 
 ;;;###autoload
@@ -218,7 +223,10 @@ Argument BIBFILE the bibliography to use."
           (doi2bib-maybe-doi-from-region-or-current-kill))))
 
   (unless bibfile
-    (setq bibfile (completing-read "Bibfile: " doi2bib-bibliography)))
+    (setq bibfile
+          (if doi2bib-bibtex-to-disable-prompt
+              doi2bib-bibtex-to-disable-prompt
+            (completing-read "Bibfile: " doi2bib-default-bibtex-files))))
   ;; Wrap in save-window-excursion to restore your window arrangement after this
   ;; is done.
   (save-window-excursion
@@ -233,8 +241,7 @@ Argument BIBFILE the bibliography to use."
 	(when (not (looking-back "\n\n" (min 3 (point))))
 	  (insert "\n\n"))
 
-        (doi2bib-insert-bibtex-entry-from-doi doi)
-        (save-buffer)))))
+        (doi2bib-insert-bibtex-entry-from-doi doi)))))
 
 (defalias 'doi-add-bibtex-entry 'doi2bib-add-bibtex-entry-from-doi
   "Alias function for convenience.")
