@@ -9,7 +9,8 @@ I created this because this was the only thing I used ~biblio.el~ for and ~bibli
 The system in ~doi-utils.el~ is more flexible since it parses all the crossref information available as ~citeproc+json~ instead of just asking directly for bibtex.
 
 ** Configuration
-- Set ~doi2bib-bibliography~ to the default bibtex file you want entries added to (e.g. ~citar-bibliography~).
+- Set ~doi2bib-default-bibtex-files~ to a list of bibtex files you want to be prompted with to add the bibtex entry to (e.g. set to ~citar-bibliography~).
+- ~doi2bib-bibtex-to-disable-prompt~ to a bibtex file that will always be used to add bibtex entries to and will also then disable prompting for a bibtex file.
 - Set ~bibtex-autokey-edit-before-use~ to ~nil~ if you don't want to be prompted for editing the bibtex key.
   - Also see emacs' builtin ~bibtex.el~ for more options on how to configure key generation and formatting. Here's my settings
 
@@ -30,5 +31,57 @@ The system in ~doi-utils.el~ is more flexible since it parses all the crossref i
   (setq bibtex-biblatex-entry-alist
         (mapcar (lambda (e) (cons (downcase (car e)) (cdr e)))
                 bibtex-BibTeX-entry-alist))
+  )
+#+end_src
+
+** Integration with ~citar-org-roam~
+
+Hopefully someday I'll write up my workflow using this package, but for now here's a snippet of by config that sets up a handy shortcut which integrates with [[https://github.com/emacs-citar/citar-org-roam][~citar-org-roam~]] to capture an org roam note based on a doi.
+
+#+begin_src emacs-lisp
+(use-package citar-org-roam
+  :after citar org-roam
+  :config
+  (citar-org-roam-mode)
+  
+  (defun my-citar-org-roam--create-capture-note (citekey entry)
+    "Open or create org-roam node for CITEKEY and ENTRY."
+    (let ((title (citar-format--entry
+                  "${author} (${year}): ${title}" entry)))
+      (org-roam-capture-
+       :templates
+       '(("r" "reference" plain "%?" :if-new
+          (file+head "references/${citekey}.org" "#+title: ${title}\n")
+          :immediate-finish t
+          :unnarrowed t))
+       :info (list :citekey citekey)
+       :node (org-roam-node-create :title title)
+       :props '(:finalize find-file))
+      (org-roam-ref-add (concat "@" citekey))
+      (org-set-property "DOI" (citar-format--entry "${doi}" entry))))
+
+  (citar-register-notes-source
+   'my-citar-org-roam-source 
+   (list :name "Org-Roam Notes"
+         :category 'org-roam-node
+         :items 'citar-org-roam--get-candidates
+         :hasitems 'citar-org-roam-has-notes
+         :open 'citar-org-roam-open-note
+         :create 'my-citar-org-roam--create-capture-note
+         :annotate 'citar-org-roam--annotate))
+  (setq citar-notes-source 'my-citar-org-roam-source)
+  )
+
+(use-package doi2bib
+  :straight (doi2bib :type git :host github :repo "akirakyle/emacs-doi2bib")
+  :init 
+  (setq doi2bib-default-bibtex-files citar-bibliography)
+  (setq doi2bib-bibtex-to-disable-prompt (car citar-bibliography))
+  
+  (defun my-add-doi-to-org-roam ()
+    (interactive)
+    (citar-create-note
+     (cdr (assoc "=key=" (call-interactively 'doi2bib-add-bibtex-entry-from-doi)))))
+  (my-leader-def "ad" 'my-add-doi-to-org-roam)
   )
 #+end_src
