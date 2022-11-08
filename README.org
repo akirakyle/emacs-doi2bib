@@ -1,0 +1,34 @@
+* doi2bib
+
+** Description
+This package was adapted from ~doi-utils.el~ which is provided as part of [[https://github.com/jkitchin/org-ref][John Kitchin's org-ref]] package.
+This package simply provides the command ~doi2bib-add-bibtex-entry-from-doi~ which adds an entry to a a bibtex file
+
+** Motivation
+I created this because this was the only thing I used ~biblio.el~ for and ~biblio.el~ could not give me properly formatted entries with the pages field filled in, specifically for articles from American Physical Society journals.
+The system in ~doi-utils.el~ is more flexible since it parses all the crossref information available as ~citeproc+json~ instead of just asking directly for bibtex.
+
+** Configuration
+- Set ~doi2bib-bibliography~ to the default bibtex file you want entries added to (e.g. ~citar-bibliography~).
+- Set ~bibtex-autokey-edit-before-use~ to ~nil~ if you don't want to be prompted for editing the bibtex key.
+  - Also see emacs' builtin ~bibtex.el~ for more options on how to configure key generation and formatting. Here's my settings
+
+#+begin_src emacs-lisp
+(use-package bibtex
+  :init
+  (setq bibtex-autokey-year-title-separator "_")
+  (setq bibtex-entry-format t)
+  (setq bibtex-align-at-equal-sign t)
+  :config
+  (setq bibtex-autokey-titleword-ignore
+        (remove "[^[:upper:]].*" bibtex-autokey-titleword-ignore))
+  
+  (setq bibtex-BibTeX-entry-alist
+        (mapcar (lambda (e) (cons (downcase (car e)) (cdr e)))
+                bibtex-BibTeX-entry-alist))
+
+  (setq bibtex-biblatex-entry-alist
+        (mapcar (lambda (e) (cons (downcase (car e)) (cdr e)))
+                bibtex-BibTeX-entry-alist))
+  )
+#+end_src

@@ -22,18 +22,7 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-
-;; This package was adapted from `doi-utils.el' which is provided as part of
-;; John Kitchin's org-ref package. This package simply provides the command
-;; `doi2bib-add-bibtex-entry-from-doi' which adds an entry to a a bibtex file
-;; (set `doi2bib-bibliography' for the default). Set
-;; `bibtex-autokey-edit-before-use' to `nil' if you don't want to be prompetd
-;; for the bibtex key. I created this because this was the only thing I used
-;; `biblio.el' for and `biblio.el' could not give me properly formatted entries
-;; with the pages field filled in for articles from American Physical Society
-;; journals. The system in `doi-utils.el' is more flexible since it parses all
-;; the crossreff information available as `citeproc+json' instead of just asking
-;; directly for bibtex.
+;; See README.org
 
 ;;; Code:
 
