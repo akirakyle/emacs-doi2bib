@@ -9,8 +9,8 @@ I created this because this was the only thing I used ~biblio.el~ for and ~bibli
 The system in ~doi-utils.el~ is more flexible since it parses all the crossref information available as ~citeproc+json~ instead of just asking directly for bibtex.
 
 ** Configuration
-- Set ~doi2bib-default-bibtex-files~ to a list of bibtex files you want to be prompted with to add the bibtex entry to (e.g. set to ~citar-bibliography~).
-- ~doi2bib-bibtex-to-disable-prompt~ to a bibtex file that will always be used to add bibtex entries to and will also then disable prompting for a bibtex file.
+- Set ~doi2bib-bibtex-file~ to a bibtex file you want to be the default used when prompted for a bibtex entry.
+  - Set ~doi2bib-disable-bibtex-prompt~ to not be prompted for a bibtex file and always use ~doi2bib-bibtex-file~.
 - Set ~bibtex-autokey-edit-before-use~ to ~nil~ if you don't want to be prompted for editing the bibtex key.
   - Also see emacs' builtin ~bibtex.el~ for more options on how to configure key generation and formatting. Here's my settings
 
@@ -75,8 +75,8 @@ Hopefully someday I'll write up my workflow using this package, but for now here
 (use-package doi2bib
   :straight (doi2bib :type git :host github :repo "akirakyle/emacs-doi2bib")
   :init 
-  (setq doi2bib-default-bibtex-files citar-bibliography)
-  (setq doi2bib-bibtex-to-disable-prompt (car citar-bibliography))
+  (setq doi2bib-bibtex-file (car citar-bibliography))
+  (setq doi2bib-disable-bibtex-prompt t)
   
   (defun my-add-doi-to-org-roam ()
     (interactive)

@@ -34,11 +34,11 @@
 (require 'dash)
 (require 's)
 
-(defvar doi2bib-default-bibtex-files nil
-  "Defalut set of bibtex files to prompt with.")
+(defvar doi2bib-bibtex-file nil
+  "Defalut bibtex files. Must be set if `doi2bib-bibtex-disable-prompt' is `t'")
 
-(defvar doi2bib-bibtex-to-disable-prompt nil
-  "Seting to a bibtex file will disable the prompt for the bibtex file.")
+(defvar doi2bib-disable-bibtex-prompt nil
+  "Disable prompting for the bibtex file.")
 
 (defvar doi2bib-dx-doi-org-url "https://doi.org/"
   "Base url to retrieve doi metadata from. A trailing / is required.")
@@ -218,15 +218,13 @@ or paste in a DOI.
 Argument BIBFILE the bibliography to use."
   (interactive
    (list (read-string
-          "DOI: "
-          ;; now set initial input
-          (doi2bib-maybe-doi-from-region-or-current-kill))))
+          "DOI: " (doi2bib-maybe-doi-from-region-or-current-kill))))
 
   (unless bibfile
     (setq bibfile
-          (if doi2bib-bibtex-to-disable-prompt
-              doi2bib-bibtex-to-disable-prompt
-            (completing-read "Bibfile: " doi2bib-default-bibtex-files))))
+          (if (and doi2bib-bibtex-file doi2bib-disable-bibtex-prompt)
+              doi2bib-bibtex-file 
+            (read-file-name "Bibfile: " nil doi2bib-bibtex-file))))
   ;; Wrap in save-window-excursion to restore your window arrangement after this
   ;; is done.
   (save-window-excursion
