@@ -159,14 +159,14 @@ MATCHING-TYPES."
                                    (lambda (field)
                                      `("  " ,(symbol-name field) " = {" ,field "},\n"))
                                    fields)
-                                  "}\n"))) nil)))))
+                                  "}"))) nil)))))
          doi2bib-bibtex-type-generators))
 
 (doi2bib-def-bibtex-type article ("journal-article" "article-journal" "article")
                            author title journal year volume number month pages doi url)
 
 (doi2bib-def-bibtex-type inproceedings ("proceedings-article" "paper-conference")
-                           author title booktitle year month pages doi url)
+                           author title booktitle year month doi url)
 
 (doi2bib-def-bibtex-type book ("book")
                            author title series publisher year pages doi url)
@@ -199,9 +199,11 @@ MATCHING-TYPES."
 (defun doi2bib-insert-bibtex-entry-from-doi (doi)
   "Insert and clean bibtex entry from a DOI. Returns the output of
 `bibtex-parse-entry' on the newly inserted bibtex entry"
+  (interactive
+   (list (read-string
+          "DOI: " (doi2bib-maybe-doi-from-region-or-current-kill))))
   (insert (doi2bib-doi-to-bibtex-string doi))
   (backward-char)
-  ;(bibtex-autokey-edit-before-use nil)
   (bibtex-clean-entry t)
   (save-buffer)
   (bibtex-parse-entry))
@@ -237,7 +239,9 @@ Argument BIBFILE the bibliography to use."
         (goto-char (point-max))
 
 	(when (not (looking-back "\n\n" (min 3 (point))))
-	  (insert "\n\n"))
+	  (if (looking-back "\n" (min 3 (point)))
+	    (insert "\n")
+	    (insert "\n\n")))
 
         (doi2bib-insert-bibtex-entry-from-doi doi)))))
 
